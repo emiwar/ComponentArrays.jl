@@ -11,6 +11,8 @@ using Test
 using Unitful
 using Functors
 
+include("formalities.jl")
+
 # Convert abstract unit range to a ViewAxis with ShapeAxis.
 r2v(r::AbstractUnitRange) = ViewAxis(r, ShapedAxis(size(r)))
 
