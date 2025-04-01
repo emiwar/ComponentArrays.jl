@@ -163,7 +163,7 @@ reindex(i, offset) = i .+ offset
 reindex(ax::FlatAxis, _) = ax
 reindex(ax::Axis, offset) = Axis(map(x->reindex(x, offset), indexmap(ax)))
 reindex(ax::ViewAxis, offset) = ViewAxis(viewindex(ax) .+ offset, indexmap(ax))
-function reindex(ax::ViewAxis{OldInds,IdxMap,Ax}, offset) where {OldInds,IdxMap,Ax<:Shaped1DAxis} 
+function reindex(ax::ViewAxis{OldInds,IdxMap,Ax}, offset) where {OldInds,IdxMap,Ax<:Union{Shaped1DAxis,ShapedAxis}}
     NewInds = viewindex(ax) .+ offset
     return ViewAxis(NewInds, Ax())
 end
