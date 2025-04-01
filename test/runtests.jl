@@ -11,6 +11,8 @@ using Test
 using Unitful
 using Functors
 
+include("formalities.jl")
+
 # Convert abstract unit range to a ViewAxis with ShapeAxis.
 r2v(r::AbstractUnitRange) = ViewAxis(r, ShapedAxis(size(r)))
 
@@ -306,7 +308,10 @@ end
     @test cmat3[:c, :b] == reshape(cmat3check[6:11, 2:5], 3, 2, 4)
     @test cmat3[:c, :c] == reshape(cmat3check[6:11, 6:11], 3, 2, 3, 2)
 
-    @test_broken reshape(a, axes(ca)...) isa Vector{Float64}
+    # https://discourse.julialang.org/t/no-method-error-reshape-when-solving-ode-with-componentarrays-jl/126342
+    x = ComponentVector(x=1.0, y=0.0, z=0.0)
+    @test reshape(x, axes(x)...) isa ComponentVector
+    @test reshape(a, axes(ca)...) isa Vector{Float64}
 
     # Issue #265: Multi-symbol indexing with matrix components
     @test ca2.c[[:a, :b]].b isa AbstractMatrix
