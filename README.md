@@ -7,10 +7,10 @@
 
 
 [docs-dev-img]: https://img.shields.io/badge/docs-latest-blue.svg
-[docs-dev-url]: https://sciml.github.io/ComponentArrays.jl/dev
+[docs-dev-url]: https://docs.sciml.ai/ComponentArrays/dev/
 
 [docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
-[docs-stable-url]: https://sciml.github.io/ComponentArrays.jl/stable
+[docs-stable-url]: https://docs.sciml.ai/ComponentArrays/stable/
 
 [build-img]: https://img.shields.io/github/actions/workflow/status/SciML/ComponentArrays.jl/ci.yml
 [build-url]: https://github.com/SciML/ComponentArrays.jl/actions/workflows/ci.yml
