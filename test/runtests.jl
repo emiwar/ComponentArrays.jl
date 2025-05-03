@@ -857,6 +857,19 @@ end
         @test all(Xstack4_dcolon[:b, :, :] .== Xstack4_noca_dcolon[2:3, :, :])
     end
 
+    # Test that we maintain higher-order components during vcat.
+    x = ComponentVector(a=rand(Float64, 2, 3, 4), b=rand(Float64, 4, 3, 2))
+    y = ComponentVector(c=rand(Float64, 3, 4, 2), d=rand(Float64, 3, 2, 4))
+    xy = vcat(x, y)
+    @test size(xy.a) == size(x.a)
+    @test size(xy.b) == size(x.b)
+    @test size(xy.c) == size(y.c)
+    @test size(xy.d) == size(y.d)
+    @test all(xy.a .≈ x.a)
+    @test all(xy.b .≈ x.b)
+    @test all(xy.c .≈ y.c)
+    @test all(xy.d .≈ y.d)
+
     # Test fix https://github.com/Deltares/Ribasim/issues/2028
     a = range(0.0, 1.0, length=0) |> collect
     b = range(0.0, 1.0; length=2) |> collect
