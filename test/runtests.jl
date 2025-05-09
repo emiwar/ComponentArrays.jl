@@ -962,6 +962,9 @@ end
     X = ComponentMatrix(randn(length(x), 5), ax, FlatAxis())
     @test eltype(X) == typeof(6.0)
     @test size(X) == (6, 5)
+    @test size(X.a) == (2, 5)
+    @test size(X.b) == (5,)
+    @test size(X.c) == (3, 5)
 
     X.b = 31:35
     @test all(X.b .== 31:35)
@@ -996,4 +999,64 @@ end
     i = 2
     new_col2 = (a=[1+i, 2+i], b=3+i, c=(d=[4+i, 5+i], e=6+i))
     @test @ballocated($X[:, $i] = $new_col2) == 0
+
+    Y = ComponentArray(zeros(length(x), 5, 7), ax, FlatAxis(), FlatAxis())
+    @test eltype(Y) == eltype(X)
+    @test size(Y) == (6, 5, 7)
+    @test size(Y.a) == (2, 5, 7)
+    @test size(Y.b) == (5, 7)
+    @test size(Y.c) == (3, 5, 7)
+    @test size(Y.c.d) == (2, 5, 7)
+
+    @test size(view(Y.c, :, :, 1)) == (3, 5)
+    @test size(view(Y.c, :, 1, :)) == (3, 7)
+    @test size(view(Y.c, :, :, 6:6)) == (3, 5, 1)
+    @test size(view(Y.c, :, :, 1).d) == (2, 5)
+    @test size(view(Y.c, :, :, 1).e) == (5,)
+
+    view(Y.c, :, 1, 7).d = [2.0, 3.0]
+    @test view(Y.c, :, 1, 7).d == [2.0, 3.0]
+    @test view(Y.c.d, :, 1, 7) == [2.0, 3.0]
+    view(Y.c, :, 1, 7).e = 1.0
+    @test view(Y.c, :, 1, 7).e == 1.0
+    view(Y.c, :, 2:5, 7).e = 2:5
+    @test view(Y.c, :, :, 7).e == 1:5
+    @test view(Y.c.e, :, 7) == 1:5
+
+
+    Y.a[:, :, 3] = fill(31.0, 2, 5)
+    @test all(view(Y.a, :, :, 3) .== 31.0)
+    @test all(Y.a[:, :, 3] .== 31.0)
+    @test all(view(Y, :, :, 3).a .== 31.0)
+
+    Y.b[:, 3] = fill(32.0, 5)
+    @test all(view(Y.b, :, 3) .== 32.0)
+    @test all(Y.b[:, 3] .== 32.0)
+    @test all(view(Y, :, :, 3).b .== 32.0)
+
+    view(Y, :, :, 4).a = fill(41.0, 2, 5)
+    @test all(view(Y.a, :, :, 4) .== 41.0)
+    @test all(Y.a[:, :, 4] .== 41.0)
+    @test all(view(Y, :, :, 4).a .== 41.0)
+    
+    view(Y, :, :, 4).b = fill(42.0, 5)
+    @test all(view(Y.b, :, 4) .== 42.0)
+    @test all(Y.b[:, 4] .== 42.0)
+    @test all(view(Y, :, :, 4).b .== 42.0)
+
+    new_col_Y = (a=10ones(2, 5), b=20ones(5), c=(d=30ones(2, 5), e=60ones(5)))
+    @test @ballocated($Y[:, :, $i] = $new_col_Y) == 0
+    @test all(Y.a[:, :, i] .== 10.0)
+    @test all(Y[:, :, i].a .== 10.0)
+    @test all(view(Y, :, :, i).a .== 10.0)
+
+    @test all(Y.b[:, i] .== 20.0)
+    @test all(Y.c.d[:, :, i] .== 30.0)
+    @test all(Y.c.e[:, i] .== 60.0)
+
+    @test Y.c[:, :, i].d == 30ones(2, 5)
+    @test Y.c[:, :, i].e == 60ones(5)
+
+    @test view(Y.c, :, :, i).d == 30ones(2, 5)
+    @test view(Y.c, :, :, i).e == 60ones(5)
 end

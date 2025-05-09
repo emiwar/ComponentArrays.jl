@@ -21,16 +21,18 @@ Base.merge(a::NamedTuple, b::ComponentArray) = merge(a, NamedTuple(b))
 
 
 @inline Base.getproperty(x::ComponentArray{T,N}, s::Symbol) where {T, N} = getproperty(x, Val(s))
-@inline function Base.getproperty(x::ComponentArray{T,N}, s::Val) where {T, N}
+function Base.getproperty(x::ComponentArray{T,N}, s::Val) where {T, N}
     _getindex(Base.maybeview, x, s, ntuple((_)->Val(:), N-1)...)
 end
 
 @inline Base.setproperty!(x::ComponentArray{T,N}, s::Symbol, v) where {T, N} = setproperty!(x, Val(s), v)
-@inline function Base.setproperty!(x::ComponentArray{T,N}, s::Val, v) where {T, N}
-    setindex!(getproperty(x, s), v, ntuple((_)->:, N-1)...)
+function Base.setproperty!(x::ComponentArray{T,N}, s::Val, v) where {T, N}
+    p = getproperty(x, s)
+    setindex!(p, v, ntuple((_)->:, ndims(p))...)
 end
-@inline function Base.setproperty!(x::ComponentArray{T,N}, s::Val, v::NamedTuple) where {T, N}
-    setindex!(getproperty(x, s), v, ntuple((_)->:, N-1)...)
+
+function Base.setproperty!(x::ComponentArray{T,N}, s::Val, v::NamedTuple) where {T, N}
+    setindex!(getproperty(x, s), v, ntuple((_)->:, N)...)
 end
 @inline Base.setproperty!(x::ComponentVector, s::Symbol, v::NamedTuple) = setproperty!(x, Val(s), v)
 @inline Base.setproperty!(x::ComponentVector, s::Val, v::NamedTuple) = setindex!(getproperty(x, s), v, :)
