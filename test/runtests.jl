@@ -955,3 +955,45 @@ end
 @testset "Reactant" begin
     include("reactant_tests.jl")
 end
+
+@testset "ComponentMatrixExtra" begin
+    x = ComponentArray(a=[1, 2], b=3, c=(d=[4, 5], e=6.0))
+    ax, = getaxes(x)
+    X = ComponentMatrix(randn(length(x), 5), ax, FlatAxis())
+    @test eltype(X) == typeof(6.0)
+    @test size(X) == (6, 5)
+
+    X.b = 31:35
+    @test all(X.b .== 31:35)
+
+    X.c.e = Float64.([61, 62, 63, 64, 65])
+    @test all(X.c.e .== 61:65)
+
+    @test size(X.c.d) == (2, 5)
+    @test size(view(X.c, :, :)) == (3, 5)
+    @test size(view(X.c, :, 2)) == (3,)
+    @test @ballocated(view($X.c, :, 2)) == 0
+    i = 4
+    @test @ballocated(view($X.c, :, $i)) == 0
+
+    #Assigning new row
+    new_row = [41, 42, 43, 44, 45]
+    @test @ballocated($X.c.d[1, :] = $new_row) == 0
+    @test all(view(X.c.d, 1, :) .== 41:45)
+
+    #Assigning new column
+    new_col = (a=[11, 21], b=31, c=(d=[41, 51], e=61))
+    @test @ballocated($X[:, 1] = $new_col) == 0
+    @test X.a[1, 1] == 11.0
+    @test X.a[2, 1] == 21.0
+    @test X[1, 1] == 11.0
+    @test X.b[1] == 31.0
+    @test X.c isa ComponentArray
+    @test X.c.e[1] == 61.0
+    @test all(X.c.d[:, 1] .== [41.0, 51.0])
+    @test all(view(X.c.d, :, 1) .== [41.0, 51.0])
+
+    i = 2
+    new_col2 = (a=[1+i, 2+i], b=3+i, c=(d=[4+i, 5+i], e=6+i))
+    @test @ballocated($X[:, $i] = $new_col2) == 0
+end

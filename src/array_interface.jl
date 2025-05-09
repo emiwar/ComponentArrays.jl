@@ -111,6 +111,12 @@ Base.@propagate_inbounds Base.setindex!(x::ComponentArray, v, ::Colon) = setinde
 # Explicitly view
 Base.@propagate_inbounds Base.view(x::ComponentArray, idx::Vararg{ComponentArrays.FlatIdx}) = view(getdata(x), idx...)
 Base.@propagate_inbounds Base.view(x::ComponentArray, idx...) = _getindex(view, x, toval.(idx)...)
+Base.@propagate_inbounds function Base.view(x::ComponentArray, idx::Vararg{FlatOrColonIdx})
+    axs = map((ax, i) -> getindex(ax, i).ax, getaxes(x), idx)
+    axs = remove_nulls(axs...)
+    return ComponentArray(view(getdata(x), idx...), axs...)
+end
+
 
 Base.@propagate_inbounds Base.maybeview(x::ComponentArray, idx::Vararg{ComponentArrays.FlatIdx}) = Base.maybeview(getdata(x), idx...)
 Base.@propagate_inbounds Base.maybeview(x::ComponentArray, idx...) = _getindex(Base.maybeview, x, toval.(idx)...)
